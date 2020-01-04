@@ -28,8 +28,8 @@ demo () {
 history () {
     cd demo/
     commit_file=
-    git log --oneline --pretty=format:"%ad|%s" > "../COMMITS"
-    awk '{print NR-1 "|" $s}' "../COMMITS" > "../HISTORY" 
+    git log --oneline --pretty=format:"%ad|%s" | awk '{print NR-1 "|" $s}' > "../COMMITS"
+    tac "../COMMITS" > "../HISTORY"
     sed -i '1d;$d' "../HISTORY"
     touch "../LATEST"
     touch "../FIRST"
@@ -37,18 +37,12 @@ history () {
 
 show () {
     cd demo/
-    git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
-}
-
-git-rebase-custom() {
-    GIT_SEQUENCE_EDITOR="sed -i -ze 's/^pick/e/'" git rebase "HEAD~$1^" -i
-    GIT_COMMITTER_DATE="$2" git commit --amend --no-edit --date="$2"
-    GIT_SEQUENCE_EDITOR=touch git rebase --continue
+    git log --pretty=fuller
 }
 
 apply () {
     cd demo/
-    commit_latest "$(cat ../LATEST)"
+    commit_first "$(cat ../FIRST)"
     while read p; do
         counter=$(echo "$p" | cut -d'|' -f1)
         datetime=$(echo "$p" | cut -d'|' -f2)
@@ -56,19 +50,44 @@ apply () {
 
         git-rebase-custom "$counter" "$datetime"
     done <"../HISTORY"
-    commit_first "$(cat ../FIRST)"
+    commit_latest "$(cat ../LATEST)"
 }
+
+git-rebase-custom() {
+    datetime="$2"
+    (
+        export GIT_COMMITTER_DATE="$datetime"
+
+        GIT_SEQUENCE_EDITOR="sed -i -ze 's/^pick/e/'" git rebase "HEAD~$1^" -i
+        git commit --amend --no-edit --date="$datetime"
+        GIT_SEQUENCE_EDITOR=touch git rebase --continue
+
+        unset GIT_COMMITTER_DATE
+    )
+}
+
 
 commit_latest () {
     datetime="$@"
-    GIT_COMMITTER_DATE="$datetime" git commit --amend --no-edit --date="$datetime"
+    (
+        export GIT_COMMITTER_DATE="$datetime"
+        git commit --amend --no-edit --date="$datetime"
+
+        unset GIT_COMMITTER_DATE
+    )
 }
 
 commit_first () {
     datetime="$@"
-    GIT_SEQUENCE_EDITOR="sed -i -ze 's/^pick/e/'" git rebase -i --root
-    GIT_COMMITTER_DATE="$datetime" git commit --amend --no-edit --date="$datetime"
-    GIT_SEQUENCE_EDITOR=touch git rebase --continue
+    (
+        export GIT_COMMITTER_DATE="$datetime"
+
+        GIT_SEQUENCE_EDITOR="sed -i -ze 's/^pick/e/'" git rebase -i --root
+        git commit --amend --no-edit --date="$datetime"
+        GIT_SEQUENCE_EDITOR=touch git rebase --continue
+
+        unset GIT_COMMITTER_DATE
+    )
 }
 
 cycle () {
