@@ -1,8 +1,8 @@
 #!/bin/bash
 
-fresh () {
-    mkdir -p fresh/
-    cd fresh/
+clone () {
+    mkdir -p clone/
+    cd clone/
 
     # Initialize
     git init
@@ -20,13 +20,13 @@ fresh () {
     done
 }
 
-demo () {
-    rm -rf demo/
-    cp -r fresh/ demo/
+working () {
+    rm -rf working/
+    cp -r clone/ working/
 }
 
 history () {
-    cd demo/
+    cd working/
     commit_file=
     git log --oneline --pretty=format:"%ad|%s" | awk '{print NR-1 "|" $s}' > "../COMMITS"
     tac "../COMMITS" > "../HISTORY"
@@ -36,12 +36,12 @@ history () {
 }
 
 show () {
-    cd demo/
+    cd working/
     git log --pretty=fuller
 }
 
 apply () {
-    cd demo/
+    cd working/
     commit_first "$(cat ../FIRST)"
     while read p; do
         counter=$(echo "$p" | cut -d'|' -f1)
@@ -91,7 +91,7 @@ commit_first () {
 }
 
 cycle () {
-    ( demo )
+    ( working )
     ( apply )
     ( show )
 }
