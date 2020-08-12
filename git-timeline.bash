@@ -1,5 +1,37 @@
 #!/bin/bash
 
+fuzzy () {
+    mkdir -p fuzzy/
+    cd fuzzy/
+    days=${1:-731}
+    daily=${2:-2}
+
+    # Initialize
+    git init
+    echo "0" > FILE
+    git add FILE
+    git commit -m 'Initial commit'
+
+    export INITIAL_DATE='2019-01-01 19:50:42 -0400'
+    for i in $(seq 1 $days)
+    do
+        commits=$((RANDOM % $daily))
+        for d in $(seq 1 $commits)
+        do
+            hour=$((18 + RANDOM % 5))
+            minute=$((RANDOM % 60))
+            second=$((RANDOM % 60))
+            NEXT_DATE=$(date "+%Y-%m-%d ${hour}:${minute}:${second} %z" -d "$INITIAL_DATE + $i day")
+
+            echo "$i:$d times" > FILE
+            git add FILE
+            set GIT_COMMITTER_DATE="${NEXT_DATE}"
+            set GIT_AUTHOR_DATE="${NEXT_DATE}"
+            GIT_AUTHOR_DATE="${NEXT_DATE}" GIT_COMMITTER_DATE="${NEXT_DATE}" git commit -m "[peon] work $i:$d"
+        done
+    done
+}
+
 clone () {
     mkdir -p clone/
     cd clone/
