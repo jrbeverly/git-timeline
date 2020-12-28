@@ -1,0 +1,18 @@
+{
+  "slug": "git-timeline",
+  "namespace": "jrbeverly",
+  "status": "archived",
+  "icon": "icon.svg",
+  "license": {
+    "type": "MIT",
+    "content": "Jonathan Beverly <jrbeverly>"
+  },
+  "topics": [
+    "git",
+    "git-commit-format"
+  ],
+  "languages": [
+    "Dockerfile",
+    "Shell"
+  ]
+}
