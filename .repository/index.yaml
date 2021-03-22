@@ -1,0 +1,15 @@
+slug: git-timeline
+description: Adjust the time of a series of commits in a git repository
+project: workbench
+namespace:
+status: archived
+icon: icon.svg
+license:
+  type: MIT
+  content: Jonathan Beverly <jrbeverly>
+  year: 2020
+topics: |-
+  [
+    "git",
+    "git-commit-format"
+  ]
